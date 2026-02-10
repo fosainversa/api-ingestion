@@ -12,6 +12,27 @@ Internet → API Gateway (with security layers) → Lambda → DynamoDB
           EventBridge (weekly) → Lambda → S3 (summary)
 ```
 
+## 📁 Project Structure
+
+```
+aws-data-ingestion-api/
+├── README.md
+├── SETUP_GUIDE.md        ← Detailed  guide
+├── app.py                ← CDK entry point
+├── cdk.json              ← CDK configuration
+├── requirements.txt      ← Python dependencies
+│
+├── stacks/
+│   └── data_ingestion_stack.py
+│
+└── lambda/
+    ├── authorizer.py
+    ├── ingest_handler.py
+    ├── weekly_summary_handler.py
+    └── requirements.txt
+
+```
+
 ## 🔒 Security Features
 
 - **JWT-based Lambda Authorizer** - Token validation with RS256
@@ -83,28 +104,6 @@ cdk deploy --outputs-file outputs.json
 ```bash 
 chmod +x test_api.sh
 ./test_api.sh
-```
-
-## 📁 Project Structure
-
-```
-aws-data-ingestion-api/
-├── README.md
-├── SETUP_GUIDE.md        ← Detailed  guide
-├── app.py                ← CDK entry point
-├── cdk.json              ← CDK configuration
-├── requirements.txt      ← Python dependencies
-├── generate_jwt.py       ← JWT generator
-│
-├── stacks/
-│   └── data_ingestion_stack.py
-│
-└── lambda/
-    ├── authorizer.py
-    ├── ingest_handler.py
-    ├── weekly_summary_handler.py
-    └── requirements.txt
-
 ```
 
 ## 💰 Cost Estimate (Free Tier)
