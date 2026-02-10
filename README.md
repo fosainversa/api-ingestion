@@ -38,7 +38,6 @@ aws-data-ingestion-api/
 - **JWT-based Lambda Authorizer** - Token validation with RS256
 - **API Keys & Usage Plans** - Rate limiting and identification
 - **Request Validation** - JSON schema validation
-- **IP Whitelisting** - Resource policy (optional)
 - **CloudWatch Logging** - Full audit trail
 - **IAM Least Privilege** - Minimal permissions
 - **KMS Encryption** - Environment variables encrypted
