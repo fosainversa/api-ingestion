@@ -93,6 +93,8 @@ cdk deploy --outputs-file outputs.json
 chmod +x test_api.sh
 ./test_api.sh
 ```
+<img width="1017" height="554" alt="image" src="https://github.com/user-attachments/assets/34d55232-4add-43a8-815b-6b612bb38645" />
+
 
 ## 💰 Cost Estimate (Free Tier)
 
