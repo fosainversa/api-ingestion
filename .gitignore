@@ -1,0 +1,349 @@
+# ============================================================================
+# AWS CDK + Python + Lambda Project .gitignore
+# ============================================================================
+
+# ============================================================================
+# Python
+# ============================================================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python local development
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# ============================================================================
+# AWS CDK
+# ============================================================================
+# CDK asset staging directory
+.cdk.staging/
+cdk.out/
+
+# CDK Context & Staging
+cdk.context.json
+.cdk.staging
+
+# CDK outputs
+cdk-outputs.json
+cdk-outputs-*.json
+
+# ============================================================================
+# AWS Lambda Dependencies
+# ============================================================================
+# Lambda layer dependencies installed in src/python/lambda/
+src/python/lambda/src/
+src/python/lambda/src/*/
+src/python/lambda/six.py
+src/python/lambda/boto3/
+src/python/lambda/boto3-*/
+src/python/lambda/botocore/
+src/python/lambda/botocore-*/
+src/python/lambda/jwt/
+src/python/lambda/PyJWT*/
+src/python/lambda/cryptography/
+src/python/lambda/cryptography-*/
+src/python/lambda/cffi/
+src/python/lambda/cffi-*/
+src/python/lambda/pycparser/
+src/python/lambda/pycparser-*/
+src/python/lambda/dateutil/
+src/python/lambda/python_dateutil*/
+src/python/lambda/jmespath/
+src/python/lambda/jmespath-*/
+src/python/lambda/s3transfer/
+src/python/lambda/s3transfer-*/
+src/python/lambda/urllib3/
+src/python/lambda/urllib3-*/
+src/python/lambda/six.py
+src/python/lambda/six-*/
+src/python/lambda/_cffi_backend*
+src/python/lambda/*.dist-info/
+src/python/lambda/bin/
+
+# Keep requirements.txt but ignore installed packages
+!src/python/lambda/requirements.txt
+
+# ============================================================================
+# IDE / Editors
+# ============================================================================
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================================================
+# Operating System
+# ============================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# ============================================================================
+# AWS / Secrets
+# ============================================================================
+# AWS credentials (should NEVER be in repo)
+.aws/
+aws-credentials.txt
+credentials.txt
+*.pem
+*.key
+
+# Environment variables with secrets
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.staging
+
+# Secrets and keys
+secrets.json
+*.secret
+*.secrets
+
+# ============================================================================
+# Testing
+# ============================================================================
+# Test outputs
+test-results/
+test-results.xml
+test-logs/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Test responses
+response.json
+/tmp/response.json
+/tmp/authorizer_response.json
+/tmp/test_event.json
+/tmp/authorizer_event.json
+
+# ============================================================================
+# Logs
+# ============================================================================
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm
+
+# ============================================================================
+# Node.js (for CDK CLI)
+# ============================================================================
+node_modules/
+package-lock.json
+yarn.lock
+.pnp
+.pnp.js
+
+# ============================================================================
+# Security Scanning
+# ============================================================================
+# Snyk
+.snyk
+snyk.sarif
+
+# Bandit
+.bandit
+
+# ============================================================================
+# Documentation
+# ============================================================================
+# Sphinx documentation
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# mkdocs documentation
+/site
+
+# ============================================================================
+# Temporary Files
+# ============================================================================
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# Temporary test scripts
+/tmp/
+temp/
+
+# ============================================================================
+# Deployment Artifacts
+# ============================================================================
+# CloudFormation templates (generated)
+*.template.json
+*.template.yaml
+
+# Lambda deployment packages
+*.zip
+lambda-package.zip
+
+# ============================================================================
+# Project Specific
+# ============================================================================
+# Generated JWT tokens (for testing)
+*.jwt
+test-token.txt
+
+# Local testing scripts output
+test_output.txt
+api_response.json
+
+# Deployment logs
+deployment.log
+deploy-*.log
+
+# Local configuration overrides
+config.local.json
+settings.local.json
+
+# Backup files
+*.backup
+
+# ============================================================================
+# Keep These Files
+# ============================================================================
+# Explicitly keep important files that might match ignore patterns
+!.gitignore
+!.github/
+!requirements.txt
+!*/requirements.txt
+!cdk.json
+!README.md
+!LICENSE
+!Makefile
+!*.sh
+
+# Keep Lambda handler files
+!src/python/lambda/authorizer.py
+!src/python/lambda/ingest_handler.py
+!src/python/lambda/weekly_summary_handler.py
+!src/python/lambda/requirements.txt
