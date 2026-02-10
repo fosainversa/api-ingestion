@@ -114,7 +114,6 @@ chmod +x test_api.sh
 | CloudWatch Logs | 5 GB ingestion | <2 GB | $0 |
 | **Total** | | | **$0/month** |
 
-```
 
 ## 🗑️ Cleanup
 
