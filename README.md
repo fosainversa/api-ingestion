@@ -74,16 +74,7 @@ aws configure
 cdk bootstrap aws://ACCOUNT-ID/AWS_Region
 ```
 
-### 3. Generate JWT Keys
-
-```bash
-# REQUIRED before deployment!
-cd lambda
-python generate_jwt.py
-cd ..
-```
-
-### 4. Deploy
+### 3. Deploy
 
 ```bash
 # Synthesize CloudFormation template
@@ -96,7 +87,7 @@ cdk deploy
 cdk deploy --outputs-file outputs.json
 ```
 
-### 5. Test the API
+### 4. Test the API
 
 ```bash 
 chmod +x test_api.sh
