@@ -99,11 +99,11 @@ aws-data-ingestion-api/
 ├── stacks/
 │   └── data_ingestion_stack.py
 │
-├── lambda/
-│   ├── authorizer.py
-│   ├── ingest_handler.py
-│   ├── weekly_summary_handler.py
-│   └── requirements.txt
+└── lambda/
+    ├── authorizer.py
+    ├── ingest_handler.py
+    ├── weekly_summary_handler.py
+    └── requirements.txt
 
 ```
 
