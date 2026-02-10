@@ -127,20 +127,3 @@ aws-data-ingestion-api/
 cdk destroy
 ```
 
-## 📚 Documentation
-
-- **SETUP_GUIDE.md** - Complete 20-step deployment guide
-- **ARCHITECTURE.md** - Technical architecture details
-- **DEPLOYMENT.md** - Advanced deployment scenarios
-
-## 🔐 Security Notes
-
-⚠️ **NEVER commit `private_key.pem` to version control** - it's already in `.gitignore`
-
-## 📄 License
-
-MIT License
-
----
-
-**Built with ❤️ using AWS CDK and Python**
