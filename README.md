@@ -9,7 +9,8 @@ A secure data ingestion API built with AWS CDK using only free-tier resources.
 ### Data flow
 
 ```
-Client → API Gateway → Authorizer Lambda → SSM → Authorizer Lambda → API Gateway → Ingest Lambda → DynamoDB → (weekly) Summary Lambda → S3
+Client → API Gateway → Authorizer Lambda → SSM → Authorizer Lambda → API Gateway
+→ Ingest Lambda → DynamoDB → (weekly) Summary Lambda → S3
 ```
 
 ## 📁 Project Structure
