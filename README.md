@@ -1,6 +1,6 @@
 # Secure Data Ingestion API - AWS CDK Solution
 
-A production-ready, secure data ingestion API built with AWS CDK using only free-tier resources.
+A secure data ingestion API built with AWS CDK using only free-tier resources.
 
 ## 🏗️ Architecture
 
