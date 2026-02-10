@@ -67,6 +67,10 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 npm install -g aws-cdk
+
+# Install Lambda dependencies
+cd src/python/lambda
+pip install -r requirements.txt
 ```
 
 ### 2. Configure AWS
