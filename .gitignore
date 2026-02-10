@@ -290,6 +290,7 @@ docs/_templates/
 *.swp
 *.swo
 *~
+*.old
 
 # Temporary test scripts
 /tmp/
