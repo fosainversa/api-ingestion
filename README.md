@@ -33,13 +33,18 @@ secure_free_tier_api/
 
 ## 🔒 Security Features
 
-- **JWT-based Lambda Authorizer** - Token validation with RS256
-- **API Keys & Usage Plans** - Rate limiting and identification
-- **Request Validation** - JSON schema validation
-- **CloudWatch Logging** - Full audit trail
-- **IAM Least Privilege** - Minimal permissions
-- **KMS Encryption** - Environment variables encrypted
-- **HTTPS Only** - TLS 1.2+ enforced
+### **Authentication & Authorization**
+
+- **JWT Bearer Token** - HS256 algorithm with SSM-stored secrets
+- **API Keys** - Rate limiting and client identification
+- **Request Validation** - JSON schema validation at API Gateway
+
+### **AWS Security**
+- **IAM Least Privilege** - Minimal permissions per function
+- **AWS-Managed Encryption** - DynamoDB and S3 encryption at rest
+- **SSM Parameter Store** - Encrypted secret storage (FREE)
+- **CloudWatch Logging** - Full audit trail with retention
+- **HTTPS Only** - API Gateway enforces HTTPS (default)
 
 ## 📋 Prerequisites
 
