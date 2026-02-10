@@ -15,21 +15,19 @@ Internet → API Gateway (with security layers) → Lambda → DynamoDB
 ## 📁 Project Structure
 
 ```
-aws-data-ingestion-api/
-├── README.md
-├── SETUP_GUIDE.md        ← Detailed  guide
-├── app.py                ← CDK entry point
-├── cdk.json              ← CDK configuration
-├── requirements.txt      ← Python dependencies
+secure_free_tier_api/
+├── app.py                        # CDK entry point
+├── requirements.txt              # CDK dependencies
+├── src/python/
+│   ├── cdk/
+│   │   └── data_ingestion_stack.py
+│   └── lambda/
+│       ├── authorizer.py
+│       ├── ingest_handler.py
+│       ├── weekly_summary_handler.py
+│       └── requirements.txt      # PyJWT only
 │
-├── stacks/
-│   └── data_ingestion_stack.py
-│
-└── lambda/
-    ├── authorizer.py
-    ├── ingest_handler.py
-    ├── weekly_summary_handler.py
-    └── requirements.txt
+└── test_api.sh                   # Testing script
 
 ```
 
