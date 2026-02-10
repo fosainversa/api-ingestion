@@ -80,9 +80,9 @@ cdk deploy --outputs-file outputs.json
 
 ### 5. Test the API
 
-```bash
-
-bash test_api.sh
+```bash 
+chmod +x test_api.sh
+./test_api.sh
 ```
 
 ## 📁 Project Structure
@@ -90,10 +90,11 @@ bash test_api.sh
 ```
 aws-data-ingestion-api/
 ├── README.md
-├── SETUP_GUIDE.md        ← Detailed 20-step guide
+├── SETUP_GUIDE.md        ← Detailed  guide
 ├── app.py                ← CDK entry point
 ├── cdk.json              ← CDK configuration
 ├── requirements.txt      ← Python dependencies
+├── generate_jwt.py       ← JWT generator
 │
 ├── stacks/
 │   └── data_ingestion_stack.py
@@ -102,15 +103,8 @@ aws-data-ingestion-api/
 │   ├── authorizer.py
 │   ├── ingest_handler.py
 │   ├── weekly_summary_handler.py
-│   └── generate_keys.py
-│
-├── scripts/
-│   └── generate_test_token.py
-│
-└── tests/
-    ├── test_authorizer.py
-    ├── test_ingest_handler.py
-    └── test_weekly_summary.py
+│   └── requirements.txt
+
 ```
 
 ## 💰 Cost Estimate (Free Tier)
@@ -124,14 +118,6 @@ aws-data-ingestion-api/
 | CloudWatch Logs | 5 GB ingestion | <2 GB | $0 |
 | **Total** | | | **$0/month** |
 
-## 🧪 Testing
-
-```bash
-# Run unit tests
-pytest tests/ -v
-
-# With coverage
-pytest tests/ --cov=lambda --cov-report=html
 ```
 
 ## 🗑️ Cleanup
