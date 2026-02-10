@@ -73,7 +73,7 @@ npm install -g aws-cdk
 ```bash
 # Configure AWS CLI
 aws configure
-# Enter your AWS Access Key ID, Secret Access Key, and set region to eu-west-2
+# Enter your AWS Access Key ID, Secret Access Key and Region 
 
 # Bootstrap CDK (first time only)
 cdk bootstrap aws://ACCOUNT-ID/AWS_Region
@@ -88,8 +88,8 @@ cdk synth
 # Deploy the stack
 cdk deploy
 
-# Save outputs
-cdk deploy --outputs-file outputs.json
+# Save outputs if needed
+cdk deploy --outputs-file outputs.json 
 ```
 
 ### 4. Test the API
