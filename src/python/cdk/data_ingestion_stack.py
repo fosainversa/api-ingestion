@@ -17,8 +17,10 @@ from aws_cdk import (
     aws_iam as iam,
     aws_cloudwatch as cloudwatch,
     aws_cloudwatch_actions as cw_actions,
-    aws_ssm as ssm,
+    aws_ssm as ssm
 )
+import aws_cdk.aws_sns as sns
+import aws_cdk.aws_sns_subscriptions as sns_subscriptions
 from constructs import Construct
 import os
 import secrets
@@ -401,9 +403,51 @@ class DataIngestionStack(Stack):
         )
 
         # ========================================
-        # CloudWatch Alarms
+        # CloudWatch Alarms + SNS Alerting
         # ========================================
         
+        alert_topic = sns.Topic(
+            self,
+            "AlertTopic",
+            display_name=f"DataIngestionAPI Alerts ({deployment_env})",
+            topic_name=f"DataIngestionAPI-Alerts-{deployment_env}",
+        )
+
+        # Wire up email alerts if ALERT_EMAIL env var is provided at synth time
+        alert_email = os.environ.get("ALERT_EMAIL")
+        if alert_email:
+            alert_topic.add_subscription(
+                sns_subscriptions.EmailSubscription(alert_email)
+            )
+
+        # Alarm: Lambda errors on ingest function
+        ingest_error_alarm = cloudwatch.Alarm(
+            self,
+            "IngestLambdaErrors",
+            metric=ingest_lambda.metric_errors(),
+            threshold=1,
+            evaluation_periods=1,
+            datapoints_to_alarm=1,
+            alarm_description="Ingest Lambda is throwing errors",
+            alarm_name=f"DataIngestion-IngestErrors-{deployment_env}",
+            treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
+        )
+        ingest_error_alarm.add_alarm_action(cw_actions.SnsAction(alert_topic))
+
+        # Alarm: Authorizer errors
+        authorizer_error_alarm = cloudwatch.Alarm(
+            self,
+            "AuthorizerLambdaErrors",
+            metric=authorizer_lambda.metric_errors(),
+            threshold=5,
+            evaluation_periods=1,
+            datapoints_to_alarm=1,
+            alarm_description="Authorizer Lambda is throwing errors",
+            alarm_name=f"DataIngestion-AuthorizerErrors-{deployment_env}",
+            treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
+        )
+        authorizer_error_alarm.add_alarm_action(cw_actions.SnsAction(alert_topic))
+
         # Alarm for high 4XX error rate
         alarm_4xx = cloudwatch.Alarm(
             self,
@@ -416,6 +460,7 @@ class DataIngestionStack(Stack):
             alarm_name=f"DataIngestionAPI-4XX-{deployment_env}",
             treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
         )
+        alarm_4xx.add_alarm_action(cw_actions.SnsAction(alert_topic))
 
         # Alarm for high 5XX error rate
         alarm_5xx = cloudwatch.Alarm(
@@ -429,19 +474,7 @@ class DataIngestionStack(Stack):
             alarm_name=f"DataIngestionAPI-5XX-{deployment_env}",
             treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
         )
-
-        # Alarm for Lambda errors
-        alarm_lambda = cloudwatch.Alarm(
-            self,
-            "LambdaErrors",
-            metric=ingest_lambda.metric_errors(),
-            threshold=3,
-            evaluation_periods=2,
-            datapoints_to_alarm=2,
-            alarm_description="Lambda function errors exceed threshold",
-            alarm_name=f"DataIngestionLambda-Errors-{deployment_env}",
-            treat_missing_data=cloudwatch.TreatMissingData.NOT_BREACHING,
-        )
+        alarm_5xx.add_alarm_action(cw_actions.SnsAction(alert_topic))
 
         # ========================================
         # Outputs
@@ -479,12 +512,10 @@ class DataIngestionStack(Stack):
             export_name=f"DataIngestionAPI-BucketName-{deployment_env}",
         )
 
-        CfnOutput(
-            self,
-            "HealthCheckUrl",
-            value=f"{api.url}health",
-            description="Health check endpoint (no auth required)",
-            export_name=f"DataIngestionAPI-HealthCheck-{deployment_env}",
+        CfnOutput(self, "AlertTopicArn",
+            value=alert_topic.topic_arn,
+            description="SNS topic ARN for operational alerts",
+            export_name=f"DataIngestionAPI-AlertTopic-{deployment_env}",
         )
 
         CfnOutput(
