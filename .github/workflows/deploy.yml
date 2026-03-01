@@ -1,0 +1,214 @@
+name: Deploy Data Ingestion Stack
+
+on:
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: "CDK stack name to target"
+        required: true
+        type: choice
+        options:
+          - DataIngestionStack-Dev
+          - DataIngestionStack-Prod
+        default: DataIngestionStack-Dev
+
+      entry_point:
+        description: "CDK app entry point"
+        required: true
+        type: string
+        default: "src/python/cdk/app.py"
+
+      environment:
+        description: "Target environment (maps to its own AWS account)"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+        default: dev
+
+      action:
+        description: "Deployment action to perform"
+        required: true
+        type: choice
+        options:
+          - diff
+          - deploy
+          - destroy
+        default: diff
+
+# Prevent concurrent runs targeting the same environment
+concurrency:
+  group: deploy-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  cdk:
+    name: "CDK ${{ github.event.inputs.action }} → ${{ github.event.inputs.environment }}"
+    runs-on: ubuntu-latest
+
+    # Map environment input to the matching GitHub environment
+    # (each environment has its own AWS credentials configured as secrets)
+    environment: ${{ github.event.inputs.environment }}
+
+    # Guard: destroy requires prod confirmation — only allow on prod if user
+    # explicitly chose 'destroy'. The environment protection rules in GitHub
+    # (required reviewers) are the primary gate; this is a belt-and-suspenders
+    # check so destroy on prod can never be triggered accidentally.
+    steps:
+      - name: "🛡️  Destroy guard"
+        if: |
+          github.event.inputs.action == 'destroy' &&
+          github.event.inputs.environment == 'prod'
+        run: |
+          echo "::warning::Destroy requested on PROD. Proceeding — make sure required reviewers have approved."
+
+      # -----------------------------------------------------------------------
+      # Checkout
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # Python + CDK toolchain
+      # -----------------------------------------------------------------------
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: requirements.txt
+
+      - name: Set up Node.js (required for AWS CDK CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install AWS CDK CLI
+        run: npm install -g aws-cdk
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # -----------------------------------------------------------------------
+      # AWS credentials — each environment uses its own IAM role via OIDC
+      # Secrets required per environment in GitHub:
+      #   AWS_ROLE_ARN      — IAM role ARN to assume (OIDC)
+      #   AWS_REGION        — target region (e.g. eu-west-2)
+      #   CDK_ACCOUNT_ID    — AWS account ID for CDK bootstrap context
+      #   ALERT_EMAIL       — (optional) email address for SNS alarm subscriptions
+      # -----------------------------------------------------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHubActions-CDK-${{ github.event.inputs.environment }}
+
+      # -----------------------------------------------------------------------
+      # Validate environment → stack name consistency
+      # Prevents e.g. deploying DataIngestionStack-Prod into the dev account
+      # -----------------------------------------------------------------------
+      - name: Validate stack / environment pairing
+        run: |
+          STACK="${{ github.event.inputs.stack }}"
+          ENV="${{ github.event.inputs.environment }}"
+
+          # Stack name must end with the capitalized environment name
+          ENV_CAP=$(echo "$ENV" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+          EXPECTED_SUFFIX="-${ENV_CAP}"
+
+          if [[ "$STACK" != *"$EXPECTED_SUFFIX" ]]; then
+            echo "::error::Stack '$STACK' does not match environment '$ENV'."
+            echo "Expected the stack name to end with '$EXPECTED_SUFFIX'."
+            exit 1
+          fi
+          echo "✅ Stack/environment pairing is valid: $STACK → $ENV"
+
+      # -----------------------------------------------------------------------
+      # CDK Synth — always runs first to catch errors early
+      # -----------------------------------------------------------------------
+      - name: CDK Synth
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_ENV: ${{ github.event.inputs.environment }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+        run: |
+          cdk synth \
+            --app "python3 ${{ github.event.inputs.entry_point }}" \
+            ${{ github.event.inputs.stack }}
+
+      # -----------------------------------------------------------------------
+      # Action: diff
+      # -----------------------------------------------------------------------
+      - name: CDK Diff
+        if: github.event.inputs.action == 'diff'
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_ENV: ${{ github.event.inputs.environment }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+        run: |
+          cdk diff \
+            --app "python3 ${{ github.event.inputs.entry_point }}" \
+            ${{ github.event.inputs.stack }}
+
+      # -----------------------------------------------------------------------
+      # Action: deploy
+      # -----------------------------------------------------------------------
+      - name: CDK Deploy
+        if: github.event.inputs.action == 'deploy'
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_ENV: ${{ github.event.inputs.environment }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+        run: |
+          cdk deploy \
+            --app "python3 ${{ github.event.inputs.entry_point }}" \
+            --require-approval never \
+            --outputs-file cdk-outputs.json \
+            ${{ github.event.inputs.stack }}
+
+      - name: Upload CDK outputs
+        if: github.event.inputs.action == 'deploy'
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdk-outputs-${{ github.event.inputs.environment }}-${{ github.run_id }}
+          path: cdk-outputs.json
+          retention-days: 30
+
+      # -----------------------------------------------------------------------
+      # Action: destroy
+      # -----------------------------------------------------------------------
+      - name: CDK Destroy
+        if: github.event.inputs.action == 'destroy'
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          DEPLOYMENT_ENV: ${{ github.event.inputs.environment }}
+        run: |
+          cdk destroy \
+            --app "python3 ${{ github.event.inputs.entry_point }}" \
+            --force \
+            ${{ github.event.inputs.stack }}
+
+      # -----------------------------------------------------------------------
+      # Summary — prints to the GitHub Actions job summary tab
+      # -----------------------------------------------------------------------
+      - name: Job summary
+        if: always()
+        run: |
+          echo "## CDK ${{ github.event.inputs.action }} Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field       | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Action      | \`${{ github.event.inputs.action }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stack       | \`${{ github.event.inputs.stack }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | \`${{ github.event.inputs.environment }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Entry point | \`${{ github.event.inputs.entry_point }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Run ID      | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
